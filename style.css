@@ -1,0 +1,23 @@
+body {
+    background-color: #f8f9fa;
+}
+
+/* Pequeños ajustes para que los interruptores (toggles) se vean mejor */
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    cursor: pointer;
+}
+.card {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.nav-tabs .nav-link {
+    font-weight: 500;
+}
+#controlCards .card {
+    transition: all 0.3s;
+}
+#controlCards .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen IoT: Biometría Conectada</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos (hace que se vea bonito) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Tu archivo de estilos CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">🏥 Ecosistema de Biometría Conectada</h1>
+        <p class="text-center lead">Monitoreo de salud y rendimiento proactivo con IoT.</p>
+
+        <!-- Pestañas (Tabs) para navegar entre las 3 aplicaciones -->
+        <ul class="nav nav-tabs nav-justified mt-5" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">⚙️ Administración (CRUD)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="control-tab" data-bs-toggle="tab" data-bs-target="#control" type="button" role="tab">🎛️ Control de Dispositivos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="monitor-tab" data-bs-toggle="tab" data-bs-target="#monitor" type="button" role="tab">📊 Monitoreo en Vivo</button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content p-4 border border-top-0 rounded-bottom bg-white" id="myTabContent">
+
+            <!-- Pestaña 1: ADMINISTRACIÓN (CRUD) -->
+            <div class="tab-pane fade show active" id="admin" role="tabpanel">
+                <h3>Administrar Dispositivos</h3>
+                <!-- Formulario para CREAR o EDITAR dispositivo -->
+                <form id="deviceForm" class="row g-3 mt-3 p-3 bg-light rounded">
+                    <input type="hidden" id="deviceId" value="">
+                    <div class="col-md-4">
+                        <label for="nombre" class="form-label">Nombre del Dispositivo</label>
+                        <input type="text" class="form-control" id="nombre" placeholder="Ej. Anillo Sensor" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select id="tipo" class="form-select">
+                            <option value="anillo">Anillo</option>
+                            <option value="plantilla">Plantilla</option>
+                            <option value="pulsera">Pulsera</option>
+                        </select>
+                    </div>
+                     <div class="col-md-3">
+                        <label for="valor_sensor" class="form-label">Valor del Sensor (0-100)</label>
+                        <input type="number" class="form-control" id="valor_sensor" min="0" max="100" value="50">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100" id="formSubmitBtn">Guardar</button>
+                    </div>
+                     <div class="col-md-12">
+                         <button type="button" class="btn btn-secondary btn-sm" id="cancelEdit">Cancelar Edición</button>
+                    </div>
+                </form>
+                <hr>
+                <!-- Tabla para mostrar dispositivos -->
+                <h5>Lista de Dispositivos</h5>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Valor Sensor</th>
+                            <th>Estado</th>
+                            <th>Última Lectura</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deviceTableBody">
+                        <tr><td colspan="7" class="text-center">Cargando dispositivos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña 2: CONTROL (Interruptores y Estatus) -->
+            <div class="tab-pane fade" id="control" role="tabpanel">
+                <h3>Control de Dispositivos</h3>
+                <div class="row" id="controlCards">
+                    <!-- Aquí se cargarán las tarjetas de control desde JavaScript -->
+                    <div class="col-12 text-center">Cargando dispositivos para control...</div>
+                </div>
+            </div>
+
+            <!-- Pestaña 3: MONITOREO (Gráfica y Tabla con refresco) -->
+            <div class="tab-pane fade" id="monitor" role="tabpanel">
+                <h3>Monitoreo en Tiempo Real <small class="text-muted fs-6">(Refresco cada 2s)</small></h3>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Estatus Gráfico de Sensores</h5>
+                                <canvas id="sensorChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Últimos 10 Estados Registrados</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Dispositivo</th>
+                                                <th>Valor</th>
+                                                <th>Estado</th>
+                                                <th>Hora</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historyTableBody">
+                                            <tr><td colspan="4" class="text-center">Esperando datos...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para alertas (como la regla de negocio) -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Alerta del Sistema</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="alertMessage">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS (necesario para las pestañas y modales) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Tu archivo JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
