@@ -3,157 +3,557 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Examen IoT: Biometría Conectada</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>BioSync IoT — Ecosistema de Biometría Conectada</title>
+
+    <!-- Favicon (placeholder, reemplaza con tu imagen en /media/) -->
+    <link rel="icon" type="image/svg+xml" href="media/favicon.svg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para iconos (hace que se vea bonito) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Chart.js para las gráficas -->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Tu archivo de estilos CSS -->
-    <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">🏥 Ecosistema de Biometría Conectada</h1>
-        <p class="text-center lead">Monitoreo de salud y rendimiento proactivo con IoT.</p>
+<!-- ═══════════════════════════ CANVAS FONDO THREE.JS ═══════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
 
-        <!-- Pestañas (Tabs) para navegar entre las 3 aplicaciones -->
-        <ul class="nav nav-tabs nav-justified mt-5" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">⚙️ Administración (CRUD)</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="control-tab" data-bs-toggle="tab" data-bs-target="#control" type="button" role="tab">🎛️ Control de Dispositivos</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="monitor-tab" data-bs-toggle="tab" data-bs-target="#monitor" type="button" role="tab">📊 Monitoreo en Vivo</button>
-            </li>
-        </ul>
+<!-- ═══════════════════════════ NAVBAR ═══════════════════════════ -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
+    <div class="container-fluid px-4">
+        <!-- Logo + Brand -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <div class="brand-icon">
+                <img src="media/logo.svg" alt="BioSync Logo" class="brand-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="brand-icon-fallback" style="display:none">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+            </div>
+            <div>
+                <span class="brand-name">Bio<span class="accent">Sync</span></span>
+                <span class="brand-sub">IoT Health Platform</span>
+            </div>
+        </a>
 
-        <!-- Contenido de las pestañas -->
-        <div class="tab-content p-4 border border-top-0 rounded-bottom bg-white" id="myTabContent">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Pestaña 1: ADMINISTRACIÓN (CRUD) -->
-            <div class="tab-pane fade show active" id="admin" role="tabpanel">
-                <h3>Administrar Dispositivos</h3>
-                <!-- Formulario para CREAR o EDITAR dispositivo -->
-                <form id="deviceForm" class="row g-3 mt-3 p-3 bg-light rounded">
-                    <input type="hidden" id="deviceId" value="">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto gap-1">
+                <li class="nav-item">
+                    <a class="nav-link nav-pill active" href="#" data-tab="admin">
+                        <i class="fa-solid fa-sliders me-1"></i> Administración
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-pill" href="#" data-tab="control">
+                        <i class="fa-solid fa-gamepad me-1"></i> Control
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-pill" href="#" data-tab="monitor">
+                        <i class="fa-solid fa-chart-line me-1"></i> Monitoreo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-pill" href="#" data-tab="dashboard">
+                        <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Status + System Live -->
+            <div class="navbar-end d-flex align-items-center gap-3">
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Sistema Activo</span>
+                </div>
+                <div class="time-display" id="navTime">--:--:--</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════ HERO SECTION ═══════════════════════════ -->
+<section class="hero-section" id="heroSection">
+    <div class="container-fluid px-4">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse-ring"></span>
+                <i class="fa-solid fa-satellite-dish me-2"></i> 3 Dispositivos Conectados
+            </div>
+            <h1 class="hero-title">
+                Biometría<br><span class="hero-accent">Conectada</span>
+            </h1>
+            <p class="hero-desc">
+                Monitoreo proactivo de salud y rendimiento humano en tiempo real.<br>
+                CortiSense · StepGuard · ThermoVibe
+            </p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-num" id="heroDevices">—</span>
+                    <span class="stat-label">Dispositivos</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="heroOnline">—</span>
+                    <span class="stat-label">En Línea</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="heroAlerts">0</span>
+                    <span class="stat-label">Alertas</span>
+                </div>
+            </div>
+            <button class="btn-hero" onclick="scrollToApp()">
+                Abrir Panel <i class="fa-solid fa-arrow-down ms-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dispositivos flotantes decorativos -->
+    <div class="device-showcase">
+        <div class="device-card floating" style="--delay:0s">
+            <div class="device-icon ring-gradient"><i class="fa-solid fa-ring"></i></div>
+            <span>CortiSense</span>
+            <div class="device-value" id="heroRingVal">--</div>
+        </div>
+        <div class="device-card floating" style="--delay:0.4s">
+            <div class="device-icon step-gradient"><i class="fa-solid fa-shoe-prints"></i></div>
+            <span>StepGuard</span>
+            <div class="device-value" id="heroStepVal">--</div>
+        </div>
+        <div class="device-card floating" style="--delay:0.8s">
+            <div class="device-icon vibe-gradient"><i class="fa-solid fa-wave-square"></i></div>
+            <span>ThermoVibe</span>
+            <div class="device-value" id="heroVibeVal">--</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ MAIN APP SECTION ═══════════════════════════ -->
+<section class="app-section" id="appSection">
+    <div class="container-fluid px-4">
+
+        <!-- Tab Navigation Pills -->
+        <div class="app-tab-nav">
+            <button class="app-tab-btn active" data-target="admin">
+                <i class="fa-solid fa-database"></i>
+                <span>CRUD Dispositivos</span>
+            </button>
+            <button class="app-tab-btn" data-target="control">
+                <i class="fa-solid fa-toggle-on"></i>
+                <span>Control</span>
+            </button>
+            <button class="app-tab-btn" data-target="monitor">
+                <i class="fa-solid fa-chart-area"></i>
+                <span>Monitoreo Live</span>
+            </button>
+            <button class="app-tab-btn" data-target="dashboard">
+                <i class="fa-solid fa-gauge"></i>
+                <span>Dashboard</span>
+            </button>
+        </div>
+
+        <!-- ══ PESTAÑA ADMIN ══ -->
+        <div class="tab-panel active" id="tab-admin">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-database me-2"></i> Administración de Dispositivos</h2>
+                <p class="panel-subtitle">Registra, edita y gestiona tu ecosistema BioSync IoT</p>
+            </div>
+
+            <!-- Formulario -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <span id="formTitle"><i class="fa-solid fa-plus-circle me-2"></i>Nuevo Dispositivo</span>
+                </div>
+                <form id="deviceForm" class="row g-3">
+                    <input type="hidden" id="deviceId">
                     <div class="col-md-4">
-                        <label for="nombre" class="form-label">Nombre del Dispositivo</label>
-                        <input type="text" class="form-control" id="nombre" placeholder="Ej. Anillo Sensor" required>
+                        <label class="form-label-custom">Nombre del Dispositivo</label>
+                        <input type="text" class="form-control-custom" id="nombre" placeholder="Ej. CortiSense Alpha" required>
                     </div>
                     <div class="col-md-3">
-                        <label for="tipo" class="form-label">Tipo</label>
-                        <select id="tipo" class="form-select">
-                            <option value="anillo">Anillo</option>
-                            <option value="plantilla">Plantilla</option>
-                            <option value="pulsera">Pulsera</option>
+                        <label class="form-label-custom">Tipo</label>
+                        <select class="form-control-custom" id="tipo">
+                            <option value="anillo">🔴 Anillo (CortiSense)</option>
+                            <option value="plantilla">🟢 Plantilla (StepGuard)</option>
+                            <option value="pulsera">🔵 Pulsera (ThermoVibe)</option>
                         </select>
                     </div>
-                     <div class="col-md-3">
-                        <label for="valor_sensor" class="form-label">Valor del Sensor (0-100)</label>
-                        <input type="number" class="form-control" id="valor_sensor" min="0" max="100" value="50">
+                    <div class="col-md-3">
+                        <label class="form-label-custom">Valor Sensor (0–100)</label>
+                        <input type="number" class="form-control-custom" id="valor_sensor" min="0" max="100" value="50">
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100" id="formSubmitBtn">Guardar</button>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn-primary-custom flex-fill" id="formSubmitBtn">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Guardar
+                        </button>
                     </div>
-                     <div class="col-md-12">
-                         <button type="button" class="btn btn-secondary btn-sm" id="cancelEdit">Cancelar Edición</button>
+                    <div class="col-12">
+                        <button type="button" class="btn-ghost" id="cancelEdit">
+                            <i class="fa-solid fa-xmark me-1"></i> Cancelar edición
+                        </button>
                     </div>
                 </form>
-                <hr>
-                <!-- Tabla para mostrar dispositivos -->
-                <h5>Lista de Dispositivos</h5>
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Tipo</th>
-                            <th>Valor Sensor</th>
-                            <th>Estado</th>
-                            <th>Última Lectura</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deviceTableBody">
-                        <tr><td colspan="7" class="text-center">Cargando dispositivos...</td></tr>
-                    </tbody>
-                </table>
             </div>
 
-            <!-- Pestaña 2: CONTROL (Interruptores y Estatus) -->
-            <div class="tab-pane fade" id="control" role="tabpanel">
-                <h3>Control de Dispositivos</h3>
-                <div class="row" id="controlCards">
-                    <!-- Aquí se cargarán las tarjetas de control desde JavaScript -->
-                    <div class="col-12 text-center">Cargando dispositivos para control...</div>
+            <!-- Tabla -->
+            <div class="table-card mt-4">
+                <div class="table-card-header">
+                    <span>Lista de Dispositivos Registrados</span>
+                    <span class="device-count" id="deviceCount">0 dispositivos</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Dispositivo</th>
+                                <th>Tipo</th>
+                                <th>Valor Sensor</th>
+                                <th>Estado</th>
+                                <th>Última Lectura</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deviceTableBody">
+                            <tr><td colspan="7" class="text-center py-4 text-muted">Cargando dispositivos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ PESTAÑA CONTROL ══ -->
+        <div class="tab-panel" id="tab-control">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-toggle-on me-2"></i> Control de Dispositivos</h2>
+                <p class="panel-subtitle">Enciende, apaga y configura cada dispositivo BioSync en tiempo real</p>
+            </div>
+
+            <!-- Banner de reglas activas -->
+            <div class="rules-banner" id="rulesBanner">
+                <i class="fa-solid fa-robot me-2"></i>
+                <strong>Automatización Activa:</strong> Las reglas de negocio monitorean y actúan sobre tus dispositivos automáticamente.
+                <button class="btn-ghost-sm ms-auto" id="toggleAutoRules">
+                    <i class="fa-solid fa-power-off me-1"></i> Desactivar auto-reglas
+                </button>
+            </div>
+
+            <div class="row g-4 mt-1" id="controlCards">
+                <div class="col-12 text-center py-5 text-muted">Cargando dispositivos...</div>
+            </div>
+        </div>
+
+        <!-- ══ PESTAÑA MONITOR ══ -->
+        <div class="tab-panel" id="tab-monitor">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="panel-title"><i class="fa-solid fa-chart-line me-2"></i> Monitoreo en Tiempo Real</h2>
+                    <p class="panel-subtitle">Actualización automática cada 2 segundos — <span class="live-badge">● LIVE</span></p>
+                </div>
+                <div class="refresh-counter">
+                    <svg viewBox="0 0 36 36" class="ring-svg">
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"/>
+                        <circle id="refreshRing" cx="18" cy="18" r="15" fill="none" stroke="#00f5a0" stroke-width="3"
+                            stroke-dasharray="94.2" stroke-dashoffset="94.2" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                    </svg>
+                    <span id="refreshCountdown">2s</span>
                 </div>
             </div>
 
-            <!-- Pestaña 3: MONITOREO (Gráfica y Tabla con refresco) -->
-            <div class="tab-pane fade" id="monitor" role="tabpanel">
-                <h3>Monitoreo en Tiempo Real <small class="text-muted fs-6">(Refresco cada 2s)</small></h3>
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Estatus Gráfico de Sensores</h5>
-                                <canvas id="sensorChart" style="max-height: 300px;"></canvas>
+            <div class="row g-4">
+                <!-- Gauges individuales -->
+                <div class="col-md-4">
+                    <div class="gauge-card ring-card">
+                        <div class="gauge-header">
+                            <i class="fa-solid fa-ring"></i>
+                            <span>CortiSense</span>
+                            <span class="device-status-badge" id="ringStatus">--</span>
+                        </div>
+                        <canvas id="gaugeRing" width="200" height="200"></canvas>
+                        <div class="gauge-value" id="gaugeRingVal">--</div>
+                        <div class="gauge-label">Estrés / Cortisol</div>
+                        <div class="gauge-trend" id="ringTrend">— Sin datos</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gauge-card step-card">
+                        <div class="gauge-header">
+                            <i class="fa-solid fa-shoe-prints"></i>
+                            <span>StepGuard</span>
+                            <span class="device-status-badge" id="stepStatus">--</span>
+                        </div>
+                        <canvas id="gaugeStep" width="200" height="200"></canvas>
+                        <div class="gauge-value" id="gaugeStepVal">--</div>
+                        <div class="gauge-label">Fatiga Muscular</div>
+                        <div class="gauge-trend" id="stepTrend">— Sin datos</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gauge-card vibe-card">
+                        <div class="gauge-header">
+                            <i class="fa-solid fa-wave-square"></i>
+                            <span>ThermoVibe</span>
+                            <span class="device-status-badge" id="vibeStatus">--</span>
+                        </div>
+                        <canvas id="gaugeVibe" width="200" height="200"></canvas>
+                        <div class="gauge-value" id="gaugeVibeVal">--</div>
+                        <div class="gauge-label">Estimulación Háptica</div>
+                        <div class="gauge-trend" id="vibeTrend">— Sin datos</div>
+                    </div>
+                </div>
+
+                <!-- Gráfica línea histórica -->
+                <div class="col-12">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span><i class="fa-solid fa-chart-line me-2"></i>Histórico de Sensores (últimos 30 puntos)</span>
+                            <div class="chart-legend">
+                                <span class="legend-dot" style="background:#ff6b8a"></span> CortiSense
+                                <span class="legend-dot ms-3" style="background:#00f5a0"></span> StepGuard
+                                <span class="legend-dot ms-3" style="background:#4facfe"></span> ThermoVibe
                             </div>
                         </div>
+                        <canvas id="lineChart" style="max-height:280px"></canvas>
                     </div>
-                    <div class="col-md-12 mt-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Últimos 10 Estados Registrados</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Dispositivo</th>
-                                                <th>Valor</th>
-                                                <th>Estado</th>
-                                                <th>Hora</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="historyTableBody">
-                                            <tr><td colspan="4" class="text-center">Esperando datos...</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                </div>
+
+                <!-- Tabla histórico -->
+                <div class="col-12">
+                    <div class="table-card">
+                        <div class="table-card-header">
+                            <span><i class="fa-solid fa-clock-rotate-left me-2"></i>Últimos 10 Estados Registrados</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr><th>Dispositivo</th><th>Valor</th><th>Estado</th><th>Interpretación</th><th>Hora</th></tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Esperando datos...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal para alertas (como la regla de negocio) -->
-    <div class="modal fade" id="alertModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Alerta del Sistema</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body" id="alertMessage">
-            ...
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
-          </div>
+        <!-- ══ PESTAÑA DASHBOARD ══ -->
+        <div class="tab-panel" id="tab-dashboard">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-gauge-high me-2"></i> Dashboard Ejecutivo</h2>
+                <p class="panel-subtitle">Vista consolidada del estado de salud y bienestar del usuario</p>
+            </div>
+
+            <!-- Tarjetas KPI -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-stress">
+                        <div class="kpi-icon"><i class="fa-solid fa-brain"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiStress">--</span>
+                            <span class="kpi-label">Nivel de Estrés</span>
+                        </div>
+                        <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiStressBar"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-fatigue">
+                        <div class="kpi-icon"><i class="fa-solid fa-person-running"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiFatigue">--</span>
+                            <span class="kpi-label">Fatiga Muscular</span>
+                        </div>
+                        <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiFatigueBar"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-haptic">
+                        <div class="kpi-icon"><i class="fa-solid fa-wave-square"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiHaptic">--</span>
+                            <span class="kpi-label">Intensidad Háptica</span>
+                        </div>
+                        <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiHapticBar"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-health">
+                        <div class="kpi-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiHealth">--</span>
+                            <span class="kpi-label">Score de Bienestar</span>
+                        </div>
+                        <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiHealthBar"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendaciones IA -->
+            <div class="recommendations-card">
+                <div class="rec-header">
+                    <i class="fa-solid fa-robot me-2"></i> Recomendaciones del Sistema BioSync AI
+                </div>
+                <div class="rec-body" id="recommendationsBody">
+                    <div class="rec-item loading-pulse">Analizando datos biométricos...</div>
+                </div>
+            </div>
+
+            <!-- Mini gráfica radar + Barra de actividad -->
+            <div class="row g-4 mt-1">
+                <div class="col-md-5">
+                    <div class="chart-card">
+                        <div class="chart-header"><span>Radar Biométrico</span></div>
+                        <canvas id="radarChart" style="max-height:280px"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="chart-card">
+                        <div class="chart-header"><span>Actividad por Hora (hoy)</span></div>
+                        <canvas id="activityChart" style="max-height:280px"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Bootstrap JS (necesario para las pestañas y modales) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Tu archivo JavaScript -->
-    <script src="script.js"></script>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer class="main-footer">
+    <div class="container-fluid px-4">
+        <div class="row g-4 align-items-start">
+            <!-- Branding -->
+            <div class="col-md-4">
+                <div class="footer-brand">
+                    <div class="brand-icon small">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <span class="footer-brand-name">Bio<span>Sync</span> IoT</span>
+                </div>
+                <p class="footer-desc">
+                    Plataforma de monitoreo biométrico IoT para salud y rendimiento humano proactivo. 
+                    Desarrollado como proyecto académico de Ingeniería en Sistemas Computacionales.
+                </p>
+                <div class="footer-badges">
+                    <span class="badge-tech">IoT</span>
+                    <span class="badge-tech">Bootstrap 5</span>
+                    <span class="badge-tech">Three.js</span>
+                    <span class="badge-tech">MockAPI</span>
+                    <span class="badge-tech">Chart.js</span>
+                </div>
+            </div>
+
+            <!-- Links -->
+            <div class="col-md-2 offset-md-1">
+                <h6 class="footer-heading">Plataforma</h6>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="switchTab('admin')">Administración</a></li>
+                    <li><a href="#" onclick="switchTab('control')">Control IoT</a></li>
+                    <li><a href="#" onclick="switchTab('monitor')">Monitoreo</a></li>
+                    <li><a href="#" onclick="switchTab('dashboard')">Dashboard</a></li>
+                </ul>
+            </div>
+
+            <!-- Dispositivos -->
+            <div class="col-md-2">
+                <h6 class="footer-heading">Dispositivos</h6>
+                <ul class="footer-links">
+                    <li><a href="#">CortiSense (Anillo)</a></li>
+                    <li><a href="#">StepGuard (Plantilla)</a></li>
+                    <li><a href="#">ThermoVibe (Pulsera)</a></li>
+                    <li><a href="#">API REST → MockAPI</a></li>
+                </ul>
+            </div>
+
+            <!-- Desarrollador -->
+            <div class="col-md-3">
+                <h6 class="footer-heading">Desarrollador</h6>
+                <div class="dev-card">
+                    <div class="dev-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="dev-info">
+                        <span class="dev-name">Luis Rodrigo del Villar Morales</span>
+                        <span class="dev-role">Ing. en Sistemas Computacionales</span>
+                        <span class="dev-location"><i class="fa-solid fa-location-dot me-1"></i>Pachuca de Soto, Hidalgo</span>
+                    </div>
+                </div>
+                <div class="dev-links mt-3">
+                    <a href="https://github.com/Villa19d" target="_blank" class="dev-link-btn">
+                        <i class="fa-brands fa-github"></i> Villa19d
+                    </a>
+                    <a href="https://www.linkedin.com/in/luis-rodrigo-del-villar-morales-720810325/" target="_blank" class="dev-link-btn linkedin">
+                        <i class="fa-brands fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>© 2025 BioSync IoT — Luis Rodrigo del Villar Morales · UAEH · Ingeniería en Sistemas Computacionales</span>
+            <span class="footer-uptime">
+                <span class="status-dot small"></span> Sistema operativo · Uptime: <span id="uptimeDisplay">00:00:00</span>
+            </span>
+        </div>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════ MODAL DE ALERTAS ═══════════════════════════ -->
+<div class="modal fade" id="alertModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content alert-modal-content">
+            <div class="modal-header alert-modal-header" id="alertModalHeader">
+                <div class="alert-icon" id="alertIcon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <h5 class="modal-title" id="alertModalTitle">Alerta del Sistema</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body alert-modal-body">
+                <p id="alertMessage">...</p>
+                <div class="alert-device-info" id="alertDeviceInfo"></div>
+            </div>
+            <div class="modal-footer alert-modal-footer">
+                <span class="alert-timestamp" id="alertTimestamp"></span>
+                <button type="button" class="btn-primary-custom" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast para notificaciones no intrusivas -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div id="liveToast" class="toast biosync-toast" role="alert">
+        <div class="toast-header">
+            <span class="toast-dot me-2" id="toastDot"></span>
+            <strong class="me-auto" id="toastTitle">BioSync</strong>
+            <small id="toastTime">ahora</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastBody">...</div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script principal -->
+<script src="assets/js/script.js"></script>
 </body>
 </html>
